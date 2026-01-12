@@ -49,10 +49,27 @@ end
 let seed = ref ~-1
 let st = ref None
 
+let verbose, set_verbose =
+  let r = ref false in
+  (fun () -> !r), (fun b -> r := b)
+
+let long_tests, set_long_tests =
+  let r = ref false in
+  (fun () -> !r), (fun b -> r := b)
+
+let debug_shrink, set_debug_shrink =
+  let r = ref None in
+  (fun () -> !r), (fun s -> r := Some (open_out s))
+
+let debug_shrink_list, set_debug_shrink_list =
+  let r = ref [] in
+  (fun () -> !r), (fun b -> r := b :: !r)
+
 let set_seed_ ~colors s =
   seed := s;
-  if colors then Printf.printf "%srandom seed: %d\n%!" Color.reset_line s
-  else Printf.printf "random seed: %d\n%!" s;
+  if verbose () then
+    (if colors then Printf.printf "%srandom seed: %d\n%!" Color.reset_line s
+    else Printf.printf "random seed: %d\n%!" s;);
   let state = Random.State.make [| s |] in
   st := Some state;
   state
@@ -91,22 +108,6 @@ let random_state_ ~colors () = match !st with
   | None -> setup_random_state_ ~colors ()
 
 let random_state() = random_state_ ~colors:false ()
-
-let verbose, set_verbose =
-  let r = ref false in
-  (fun () -> !r), (fun b -> r := b)
-
-let long_tests, set_long_tests =
-  let r = ref false in
-  (fun () -> !r), (fun b -> r := b)
-
-let debug_shrink, set_debug_shrink =
-  let r = ref None in
-  (fun () -> !r), (fun s -> r := Some (open_out s))
-
-let debug_shrink_list, set_debug_shrink_list =
-  let r = ref [] in
-  (fun () -> !r), (fun b -> r := b :: !r)
 
 module Raw = struct
   type ('b,'c) printer = {
