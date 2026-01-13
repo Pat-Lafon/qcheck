@@ -57,15 +57,11 @@ let pattern_name pat : string =
     the actual body using these args. *)
 let rec args_and_body expr : (string list * expression) =
   match expr.pexp_desc with
-  | Pexp_function (fargs, _constraint, Pfunction_body expr) ->
+  | Pexp_fun (Nolabel, _, p, expr) ->
      let (args, body) = args_and_body expr in
-     let pats =
-       List.filter_map (function
-         | { pparam_desc = Pparam_val (Nolabel, _, p); _ } -> Some (pattern_name p)
-         | _ -> None
-       ) fargs
-     in
-     (pats @ args, body)
+     (pattern_name p :: args, body)
+  | Pexp_fun (_, _, _, expr) ->
+     args_and_body expr
   | _ -> ([], expr)
 
 (** {2. Recursive generators} *)
